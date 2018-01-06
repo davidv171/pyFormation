@@ -54,13 +54,14 @@ def own_probability(input_text, number_of_words):
     return new_dict
 
 
-def cond_prob(input_text, probabilities):
+def cond_prob(input_text, words):
     #Function that calculates the conditional probability of all words, based on the previous word
     #First we take join the word list by 2 words, ex.: [the,dog,is,cute]->[the dog,dog is,is cute]
     #Then we calculate the conditional probability using the wikipedia equation.
     #P(A|B) = P(AB)/P(B)
     #P(AB) = ex. how many times "the dog" was registered in the text divided by the number of all entries in the text
     #P(B) = own probability of ex. "the"
+    #TRY: P(A|B)= P(AB)/P(A)??
     #Then we count how many items the joined words occured in a text
     #Remove empty entries
     all_words = input_text
@@ -71,8 +72,9 @@ def cond_prob(input_text, probabilities):
     cnt = collections.Counter(map(str.lower,joined_words))
     double_count = cnt
     lowercase_count = double_count.keys()
-    double_own = own_probability(double_count, len(joined_words))
-    own_probs = probabilities
+    #It is irrelevant how many words we have, all that matters is how many times A followed by B occurs and how many times
+    double_own = own_probability(double_count, 1)
+    own_probs = words
 
     #Find the first word of each key in double_own and compare it to own_probs, then divide their keys
     divided_list = []
@@ -80,7 +82,7 @@ def cond_prob(input_text, probabilities):
     for key in double_own:
         first_word = key.split()[0]
         if(first_word in own_probs):
-            double_value = double_own[key]
+            double_value = double_count[key]
             own_value = own_probs[first_word]
             divided_value = double_value / own_value
             divided_list.append(divided_value)
@@ -137,4 +139,4 @@ print("Own entropy(ascending):")
 own_entropies = own_entropy(own_probabilities, uniq_characters(words))
 print(sorted(own_entropies.items(), key=operator.itemgetter(1)))
 print("Conditional probabilities:")
-print(cond_prob(words, own_probabilities))
+print(cond_prob(words, word_count))
