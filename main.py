@@ -81,7 +81,7 @@ def cond_prob(input_text, words):
 
     for key in double_own:
         first_word = key.split()[0]
-        if(first_word in own_probs):
+        if first_word in own_probs:
             double_value = double_count[key]
             own_value = own_probs[first_word]
             divided_value = double_value / own_value
@@ -91,33 +91,26 @@ def cond_prob(input_text, words):
     return cond_probs
 
 
-def uniq_characters(input_text):
-    #Firstly we count how many different characters in the text
-    #we join the entire text into one word, then check for unique characters using len(set)
-    #TODO: Decide if uniq characters is lower case or lower and upper
-    one_string = "".join(input_text)
-    uniq_chars = len(set(one_string))
-    return uniq_chars
-
-
-def equal_entropy(uniq_chars,length):
+def equal_entropy(length):
     #Function that calculates the entropy of every word, with the condition, THAT EACH WORDS PROBABILITIES ARE EQUAL(THE SAME)
     #Equation used: sum(PROBABILITY *  log(Y)(PROBABILITY)
     #Y = number of unique characters in the alphabet
+    #length = how many unique words in the text
     probability = 1/length
-    logy_probability = math.fabs(math.log(probability, uniq_chars))
+    logy_probability = math.fabs(math.log(probability, length))
     #No for loop needed, because every probability is equal
     return logy_probability
 
 
-def own_entropy(input_text, uniq_chars):
+def own_entropy(input_text):
     #Function that calculates entropy using each word's own probability
     #Uses the same formula equal entropy uses, but calculates a different probability
+    #Entropy = p * log p
     all_words = list(input_text.keys())
     all_values = list(input_text.values())
 
     for x in range(0, len(all_values)):
-        all_values[x] = (math.fabs(all_values[x] * math.log(all_values[x], uniq_chars)))
+        all_values[x] = (math.fabs(all_values[x] * math.log(all_values[x], len(input_text))))
     new_dict = dict(zip(all_words, all_values))
     return new_dict
 
@@ -133,10 +126,13 @@ print(word_count)
 own_probabilities = own_probability(word_count, word_length)
 print("Own probabilities(ascending):")
 print(sorted(own_probabilities.items(), key=operator.itemgetter(1)))
-print("Equal entropy:")
-print(equal_entropy(uniq_characters(words), word_length))
-print("Own entropy(ascending):")
-own_entropies = own_entropy(own_probabilities, uniq_characters(words))
-print(sorted(own_entropies.items(), key=operator.itemgetter(1)))
 print("Conditional probabilities:")
-print(cond_prob(words, word_count))
+conditional_probabilities = cond_prob(words,word_count)
+print(conditional_probabilities)
+print("Equal entropy(equal for every word):")
+print(equal_entropy(word_length))
+print("Own entropy(ascending):")
+own_entropies = own_entropy(own_probabilities)
+print(sorted(own_entropies.items(), key=operator.itemgetter(1)))
+print("Conditional entropies:")
+print(own_entropy(conditional_probabilities))
