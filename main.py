@@ -5,8 +5,6 @@ import collections
 import operator
 import math
 
-import sys
-
 
 def get_text():
     #A function that trims out the HTML tags
@@ -17,13 +15,14 @@ def get_text():
             data = myFile.read()
     except IOError:
         print("File error")
+
     return data
 
 
 def split_text(input_text):
     #A function that returns an array of words, separated by a space.
     #First it splits the parentheses and dots etc. and then it removes the empty characters
-    word_list = re.split('\n| |\t|,|[(|)]|\.|/|:|–|-', input_text)
+    word_list = re.split(r'[^a-zA-Z0-9čžšćđšČŽŠĐĆ]', input_text)
     word_list = list(filter(None, word_list))
     return word_list
 
