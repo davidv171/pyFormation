@@ -5,6 +5,7 @@ import collections
 import operator
 import math
 
+
 def get_text():
     #A function that trims out the HTML tags
     #Currently does not trim it all
