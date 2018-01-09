@@ -1,24 +1,19 @@
 #1. Iz http://lit.ijs.si/leposl.html pridobi besedilo
 #2 Analiziraj pridobljeno besedilo
-import urllib.request as url
-from bs4 import BeautifulSoup
 import re
 import collections
 import operator
 import math
 
-
 def get_text():
     #A function that trims out the HTML tags
     #Currently does not trim it all
-
-    source = "http://lit.ijs.si/leposl.html"
     try:
-        html = url.urlopen(source).read()
-    except url.URLError :
-        print("Not connected")
-        sys.exit(0)
-    return re.sub('<[^<]+?>', '', ''.join(BeautifulSoup(html, "lxml").findAll(text=True)))
+        with open("/home/PycharmProjects/pyFormationNEW/source.txt", 'r') as myFile:
+            data = myFile.read()
+    except IOError:
+        print("File error")
+    return data
 
 
 def split_text(input_text):
@@ -28,10 +23,6 @@ def split_text(input_text):
     #We also delete -
     word_list = re.split('\n| |\t|,|[(|)]|\.|/|:|–|-', input_text)
     word_list = list(filter(None, word_list))
-
-    #Remove this if you're using a different site!
-    n = 11
-    del word_list[:n]
     return word_list
 
 
@@ -92,10 +83,12 @@ def cond_prob(input_text, words):
 
 
 def equal_entropy(length):
-    #Function that calculates the entropy of every word, with the condition, THAT EACH WORDS PROBABILITIES ARE EQUAL(THE SAME)
+    #Function that calculates the entropy of every word, with the condition,
+    # THAT EACH WORDS PROBABILITIES ARE EQUAL(THE SAME)
     #Equation used: sum(PROBABILITY *  log(Y)(PROBABILITY)
     #Y = number of unique characters in the alphabet
     #length = how many unique words in the text
+    #TODO: Check why entropy wouldnt be 1??
     probability = 1/length
     logy_probability = math.fabs(math.log(probability, length))
     #No for loop needed, because every probability is equal
@@ -106,6 +99,7 @@ def own_entropy(input_text):
     #Function that calculates entropy using each word's own probability
     #Uses the same formula equal entropy uses, but calculates a different probability
     #Entropy = p * log p
+    #TODO: Check if correct calculation
     all_words = list(input_text.keys())
     all_values = list(input_text.values())
 
@@ -120,17 +114,23 @@ words = split_text(text)
 word_length = len(words)
 print("Words:")
 print(words)
+print("Amount of non-unique words:")
+print(len(words))
 word_count = word_counter(words)
 print("Word counter:")
 print(word_count)
+print("Amount of unique words:")
+print(len(word_count))
 own_probabilities = own_probability(word_count, word_length)
 print("Own probabilities(ascending):")
 print(sorted(own_probabilities.items(), key=operator.itemgetter(1)))
 print("Conditional probabilities:")
 conditional_probabilities = cond_prob(words,word_count)
 print(conditional_probabilities)
+print("Unique word pairs:")
+print(len(conditional_probabilities))
 print("Equal entropy(equal for every word):")
-print(equal_entropy(word_length))
+print(equal_entropy(len(word_count)))
 print("Own entropy(ascending):")
 own_entropies = own_entropy(own_probabilities)
 print(sorted(own_entropies.items(), key=operator.itemgetter(1)))
