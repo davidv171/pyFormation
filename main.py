@@ -11,7 +11,7 @@ def get_text():
     #Currently does not trim it all
 
     try:
-        with open("/home/PycharmProjects/pyFormationNEW/source.txt", 'r') as myFile:
+        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/source.txt", 'r') as myFile:
             data = myFile.read()
     except IOError:
         print("File error")
@@ -129,13 +129,11 @@ words = split_text(text)
 word_length = len(words)
 print("Words:")
 print(words)
-print("Amount of non-unique words:")
-print(len(words))
+
 word_count = word_counter(words)
 print("Word counter:")
 print(word_count)
-print("Amount of unique words:")
-print(len(word_count))
+
 own_probabilities = own_probability(word_count, word_length)
 print("Own probabilities(ascending):")
 print(sorted(own_probabilities.items(), key=operator.itemgetter(1)))
@@ -151,3 +149,7 @@ own_entropies = own_entropy(own_probabilities,word_length)
 print(own_entropies)
 print("Conditional entropies:")
 print(own_entropy(conditional_probabilities,len(conditional_probabilities)))
+print("Amount of non-unique words:")
+print(len(words))
+print("Amount of unique words:")
+print(len(word_count))
