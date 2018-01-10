@@ -11,7 +11,7 @@ def get_text():
     #Currently does not trim it all
 
     try:
-        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/source.txt", 'r') as myFile:
+        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/samplesource.txt", 'r') as myFile:
             data = myFile.read()
     except IOError:
         print("File error")
@@ -22,7 +22,7 @@ def get_text():
 def split_text(input_text):
     #A function that returns an array of words, separated by a space.
     #First it splits the parentheses and dots etc. and then it removes the empty characters
-    word_list = re.split(r'[^a-zA-Z0-9čžšćđšČŽŠĐĆ]', input_text)
+    word_list = re.split(r'[^a-zA-Z0-9čžšćđšČŽŠĐĆüÜéÉâÂÁáàÀÅåêÊËëèÈïÏîÎìÌôÔöÖòÒÛûùÙå]', input_text)
     word_list = list(filter(None, word_list))
     return word_list
 
@@ -87,7 +87,7 @@ def cond_prob(input_text, words):
     return cond_probs
 
 
-def equal_entropy(length, all_length):
+def equal_entropy(all_length):
     #Function that calculates the entropy of every word, with the condition,
     # THAT EACH WORDS PROBABILITIES ARE EQUAL(THE SAME)
     #PROBABILITY = 1/length
@@ -97,24 +97,24 @@ def equal_entropy(length, all_length):
     #TODO: Check why entropy wouldnt be 1??
     probability = 1/all_length
     try:
-        logy_probability = (math.fabs(math.log(probability, length)))
+        logy_probability = (math.fabs(math.log(probability, 2)))
     except ZeroDivisionError:
         logy_probability = 0
     #No for loop needed, because every probability is equal
     return logy_probability
 
 
-def own_entropy(input_text, length):
+def own_entropy(input_text):
     #Function that calculates entropy using each word's own probability
     #Uses the same formula equal entropy uses, but calculates a different probability
     #Entropy = p * log p
-    #TODO: Check if correct calculation
+    #Using log base 2, therefore the result is in bits!
     all_words = list(input_text.keys())
     all_values = list(input_text.values())
     if len(input_text) is 1:
         return 0
     for x in range(0, len(all_values)):
-        all_values[x] = (math.fabs(all_values[x] * math.log(all_values[x], length)))
+        all_values[x] = (math.fabs(all_values[x] * math.log(all_values[x], 2)))
     new_dict = dict(zip(all_words, all_values))
     print("Sum of all entropies")
     entropy = 0.0
@@ -133,23 +133,38 @@ print(words)
 word_count = word_counter(words)
 print("Word counter:")
 print(word_count)
+#In case there's too many words we print them out in a file for easier readability
 
 own_probabilities = own_probability(word_count, word_length)
-print("Own probabilities(ascending):")
-print(sorted(own_probabilities.items(), key=operator.itemgetter(1)))
-print("Conditional probabilities:")
+with open("Own_probs.txt", "w") as text_file:
+    print(own_probabilities, file=text_file)
 conditional_probabilities = cond_prob(words,word_count)
-print(conditional_probabilities)
-print("Unique word pairs:")
-print(len(conditional_probabilities))
+with open("Cond_probs.txt", "w") as text_file:
+    print(conditional_probabilities, file=text_file)
+
 print("Equal entropy(equal for every word):")
-print(equal_entropy(len(word_count),len(words)))
-print("Own entropy(ascending):")
-own_entropies = own_entropy(own_probabilities,word_length)
-print(own_entropies)
-print("Conditional entropies:")
-print(own_entropy(conditional_probabilities,len(conditional_probabilities)))
+print(equal_entropy(len(word_count)))
+own_entropies = own_entropy(own_probabilities)
+print("Conditional entropy:")
+
+with open("Own_entropies.txt", "w") as text_file:
+    print(own_entropies, file=text_file)
+cond_entropies = own_entropy(conditional_probabilities)
+with open("Cond_entropies.txt", "w") as text_file:
+    print(cond_entropies, file=text_file)
 print("Amount of non-unique words:")
 print(len(words))
 print("Amount of unique words:")
 print(len(word_count))
+print("Unique word pairs:")
+print(len(conditional_probabilities))
+if len(word_count) < 100 :
+    print("Own probabilities:")
+    print(own_probabilities)
+    print("Conditional probabilities:")
+    print(conditional_probabilities)
+    print("Own entropies[bit]:")
+    print(own_entropies)
+    print("Conditional entropies[bit]:")
+    print(cond_entropies)
+
