@@ -2,14 +2,10 @@
 #2 Analiziraj pridobljeno besedilo
 import re
 import collections
-import operator
 import math
 
 
 def get_text():
-    #A function that trims out the HTML tags
-    #Currently does not trim it all
-
     try:
         with open("/home/PycharmProjects/pyFormationNEW/pyFormation/samplesource.txt", 'r') as myFile:
             data = myFile.read()
@@ -75,11 +71,10 @@ def cond_prob(input_text, words):
 
     #Find the first word of each key in double_own and compare it to own_probs, then divide their keys
     divided_list = []
-    #TODO: if all the words in text are the same, conditional probability is not calculated correctly
-    for key in double_own:
-        first_word = key.split()[0]
+    for keyxd in double_own:
+        first_word = keyxd.split()[0]
         if first_word in own_probs:
-            double_value = double_count[key]
+            double_value = double_count[keyxd]
             own_value = own_probs[first_word]
             divided_value = double_value / own_value
             divided_list.append(divided_value)
@@ -114,7 +109,7 @@ def own_entropy(input_text):
     if len(input_text) is 1:
         return 0
     for x in range(0, len(all_values)):
-        all_values[x] = (math.fabs(all_values[x] * math.log(all_values[x], 2)))
+        all_values[x] = (math.fabs(all_values[x] * math.log(all_values[x],2)))
     new_dict = dict(zip(all_words, all_values))
     print("Sum of all entropies")
     entropy = 0.0
@@ -123,6 +118,12 @@ def own_entropy(input_text):
     print(entropy)
     return new_dict
 
+
+def word_generator(words,cond_probs):
+    #A function that generates words using the Markov chain principle!
+    #First word generated is a random word, the first word in a list, which is different every run
+    first_word = words[0].lower()
+    return 0
 
 text = get_text()
 words = split_text(text)
@@ -143,7 +144,8 @@ with open("Cond_probs.txt", "w") as text_file:
     print(conditional_probabilities, file=text_file)
 
 print("Equal entropy(equal for every word):")
-print(equal_entropy(len(word_count)))
+print(equal_entropy(word_length))
+print("Entropy using the own probabilities")
 own_entropies = own_entropy(own_probabilities)
 print("Conditional entropy:")
 
@@ -167,4 +169,4 @@ if len(word_count) < 100 :
     print(own_entropies)
     print("Conditional entropies[bit]:")
     print(cond_entropies)
-
+print(word_generator(words,conditional_probabilities))
