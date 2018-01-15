@@ -3,13 +3,14 @@
 import re
 import collections
 import math
-
+import sys
 
 def get_text():
     try:
-        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/source.txt", 'r') as myFile:
+        with open("/home/PychadrmProjects/pyFormationNEW/pyFormation/source.txt", 'r') as myFile:
             data = myFile.read()
     except IOError:
+        sys.exit(0)
         print("File error")
 
     return data
@@ -122,6 +123,8 @@ def own_entropy(input_text):
 def word_generator(words,cond_probs):
     #A function that generates words using the Markov chain principle!
     #First word generated is a random word, the first word in a list, which is different every run
+    #Take first word, then find it in conditional probabilities
+    #Check which word most commonly followed first word
     first_word = words[0].lower()
     return 0
 
