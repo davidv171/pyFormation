@@ -7,7 +7,7 @@ import math
 
 def get_text():
     try:
-        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/samplesource.txt", 'r') as myFile:
+        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/source.txt", 'r') as myFile:
             data = myFile.read()
     except IOError:
         print("File error")
@@ -128,12 +128,9 @@ def word_generator(words,cond_probs):
 text = get_text()
 words = split_text(text)
 word_length = len(words)
-print("Words:")
-print(words)
 
 word_count = word_counter(words)
-print("Word counter:")
-print(word_count)
+
 #In case there's too many words we print them out in a file for easier readability
 
 own_probabilities = own_probability(word_count, word_length)
@@ -161,6 +158,10 @@ print(len(word_count))
 print("Unique word pairs:")
 print(len(conditional_probabilities))
 if len(word_count) < 100 :
+    print("Words:")
+    print(words)
+    print("Word counter:")
+    print(word_count)
     print("Own probabilities:")
     print(own_probabilities)
     print("Conditional probabilities:")
