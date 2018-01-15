@@ -1,13 +1,14 @@
-#1. Iz http://lit.ijs.si/leposl.html pridobi besedilo
+#1. Iz text filea pridobi besedilo
 #2 Analiziraj pridobljeno besedilo
 import re
 import collections
 import math
 import sys
+import operator
 
 def get_text():
     try:
-        with open("/home/PychadrmProjects/pyFormationNEW/pyFormation/source.txt", 'r') as myFile:
+        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/source.txt", 'r') as myFile:
             data = myFile.read()
     except IOError:
         sys.exit(0)
@@ -45,26 +46,32 @@ def own_probability(input_text, number_of_words):
     return new_dict
 
 
-def cond_prob(input_text, words):
-    #Function that calculates the conditional probability of all words, based on the previous word
-    #First we take join the word list by 2 words, ex.: [the,dog,is,cute]->[the dog,dog is,is cute]
-    #TRY: P(A|B)= P(AB)/P(A)??
-    #Then we count how many items the joined words occured in a text
-    #Remove empty entries
-    all_words = input_text
-    #joined words is double text, that contains non-unique characters
-    #cnt = contains only unique double words and how many times they appear
-    #word_count = map with a word and the amount of times it appears
+def bigram(all_words):
+    #A function that makes bigrams and returns a
+    #Counter object with how many times each bigram appears in a text
+    #An own function because we need bigrams for generating words
+    #There are no replicates in bigrams!
     joined_words = [None] * (len(all_words)-1)
 
     for x in range(1, len(all_words)):
         joined_words[x-1] = all_words[x-1] + " " + all_words[x]
     cnt = collections.Counter(map(str.lower,joined_words))
+    return cnt
+def cond_prob(input_text, words,cnt):
+    #Function that calculates the conditional probability of all words, based on the previous word
+    #First we take join the word list by 2 words, ex.: [the,dog,is,cute]->[the dog,dog is,is cute]
+    #TRY: P(A|B)= P(AB)/P(A)??
+    #Then we count how many items the joined words occured in a text
+    #Remove empty entries
+    #joined words is double text, that contains non-unique characters
+    #cnt = contains only unique double words and how many times they appear
+    #word_count = map with a word and the amount of times it appears
+
     double_count = cnt
     lowercase_count = double_count.keys()
     #It is irrelevant how many words we have, all that matters is how many times A followed by B occurs
     # and how many times A occurs
-    double_own = own_probability(double_count, len(joined_words))
+    double_own = own_probability(double_count, len(input_text))
     own_probs = words
     #In case all the words are the same, the function under this does not work corectly, for an unknown reason
     if sum(own_probs.values()) is 1:
@@ -90,7 +97,6 @@ def equal_entropy(all_length):
     #Equation used: sum(PROBABILITY *  log(Y)(PROBABILITY)
     #Y = number of unique characters in the alphabet
     #length = how many unique words in the text
-    #TODO: Check why entropy wouldnt be 1??
     probability = 1/all_length
     try:
         logy_probability = (math.fabs(math.log(probability, 2)))
@@ -120,35 +126,54 @@ def own_entropy(input_text):
     return new_dict
 
 
-def word_generator(words,cond_probs):
+def word_generator(words,bigrams,limit):
     #A function that generates words using the Markov chain principle!
     #First word generated is a random word, the first word in a list, which is different every run
     #Take first word, then find it in conditional probabilities
     #Check which word most commonly followed first word
+    #We put it in a Counter to kind sort it, so we can just look for the first probability
+    #when looking for the first word
+    #Limit tells us how many words we want to generate
+    #count is ordered, meaning the highest probabilities are first
+    #find a first word and get the highest probability or count for (word|...)
+    #Orders the bigrams in descending order
+    bigrams = collections.OrderedDict(bigrams.most_common())
     first_word = words[0].lower()
+    list_words = list(bigrams.keys())
+    list_values = list(bigrams.values())
+    print("Generated text:")
+    first_word = first_word + " "
+    print(first_word)
+    #TODO: MAKE IT NOT LOOP SOMETIMES??
+    try:
+        for x in range(0,limit):
+            indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
+            next_word = list_words[indices[0]]
+            del(list_words[indices[0]])
+            next_word = next_word.split(" ",1)[1]
+            first_word = next_word + " "
+            print(first_word)
+    except IndexError:
+        print("Index out of bounds, check limit!")
     return 0
 
 text = get_text()
 words = split_text(text)
 word_length = len(words)
-
 word_count = word_counter(words)
-
 #In case there's too many words we print them out in a file for easier readability
-
 own_probabilities = own_probability(word_count, word_length)
 with open("Own_probs.txt", "w") as text_file:
     print(own_probabilities, file=text_file)
-conditional_probabilities = cond_prob(words,word_count)
+bigrams = bigram(words)
+conditional_probabilities = cond_prob(words,word_count,bigrams)
 with open("Cond_probs.txt", "w") as text_file:
     print(conditional_probabilities, file=text_file)
-
 print("Equal entropy(equal for every word):")
 print(equal_entropy(word_length))
 print("Entropy using the own probabilities")
 own_entropies = own_entropy(own_probabilities)
 print("Conditional entropy:")
-
 with open("Own_entropies.txt", "w") as text_file:
     print(own_entropies, file=text_file)
 cond_entropies = own_entropy(conditional_probabilities)
@@ -173,4 +198,5 @@ if len(word_count) < 100 :
     print(own_entropies)
     print("Conditional entropies[bit]:")
     print(cond_entropies)
-print(word_generator(words,conditional_probabilities))
+print("Word generator")
+print(word_generator(words,bigrams,100))
