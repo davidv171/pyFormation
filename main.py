@@ -128,7 +128,7 @@ def own_entropy(input_text):
 
 def word_generator(words,bigrams,limit):
     #A function that generates words using the Markov chain principle!
-    #First word generated is a random word, the first word in a list, which is different every run
+    #First word is found in the words Counter object, takes the first word(most common)
     #Take first word, then find it in conditional probabilities
     #Check which word most commonly followed first word
     #We put it in a Counter to kind sort it, so we can just look for the first probability
@@ -137,14 +137,20 @@ def word_generator(words,bigrams,limit):
     #count is ordered, meaning the highest probabilities are first
     #find a first word and get the highest probability or count for (word|...)
     #Orders the bigrams in descending order
+    #TODO: Check if the repetition of some very common words is not allowed
     bigrams = collections.OrderedDict(bigrams.most_common())
-    first_word = words[0].lower()
+    first_word_c = list(words.keys())
+    print(first_word_c)
+    first_word = first_word_c[0]
     list_words = list(bigrams.keys())
+
     list_values = list(bigrams.values())
+    print(list_words)
+    print(list_values)
     print("Generated text:")
     first_word = first_word + " "
     print(first_word)
-    #TODO: MAKE IT NOT LOOP SOMETIMES??
+    #TODO: TEST WORD_GENERATOR SOME MORE
     try:
         for x in range(0,limit):
             indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
@@ -161,6 +167,8 @@ text = get_text()
 words = split_text(text)
 word_length = len(words)
 word_count = word_counter(words)
+#word count is a counter with unique WORDS
+#words length is just a split text in a list
 #In case there's too many words we print them out in a file for easier readability
 own_probabilities = own_probability(word_count, word_length)
 with open("Own_probs.txt", "w") as text_file:
@@ -199,4 +207,5 @@ if len(word_count) < 100 :
     print("Conditional entropies[bit]:")
     print(cond_entropies)
 print("Word generator")
-print(word_generator(words,bigrams,100))
+ordered_word = collections.OrderedDict(word_count.most_common())
+print(word_generator(ordered_word,bigrams,100))
