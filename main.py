@@ -5,10 +5,11 @@ import collections
 import math
 import sys
 import operator
+import numpy as np
 
 def get_text():
     try:
-        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/source.txt", 'r') as myFile:
+        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/samplesource.txt", 'r') as myFile:
             data = myFile.read()
     except IOError:
         sys.exit(0)
@@ -136,26 +137,33 @@ def word_generator(words,bigrams,limit):
     #Limit tells us how many words we want to generate
     #count is ordered, meaning the highest probabilities are first
     #find a first word and get the highest probability or count for (word|...)
-    #Orders the bigrams in descending order
-    #TODO: Check if the repetition of some very common words is not allowed
-    bigrams = collections.OrderedDict(bigrams.most_common())
+    #We use Counter because numpy.random.choice doesnt take float into its parametres
     first_word_c = list(words.keys())
     print(first_word_c)
     first_word = first_word_c[0]
     list_words = list(bigrams.keys())
 
     list_values = list(bigrams.values())
-    print(list_words)
-    print(list_values)
     print("Generated text:")
     first_word = first_word + " "
-    print(first_word)
     #TODO: TEST WORD_GENERATOR SOME MORE
+    #TODO: Make the next choice WEIGHTED random, use numpy.random.choose
+    print("Randomm testing")
+    #print(list_words[rnd.choice(list_values)])
+    #choice = rnd.choice(list_words,list_values)
+    #we use a numpy array to be able to use a list as indexes,ex. a[0,14,33]
+    a = np.array(list_values)
+    test_list = [0,4,5]
     try:
+        print("Loop printing")
         for x in range(0,limit):
             indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
-            next_word = list_words[indices[0]]
-            del(list_words[indices[0]])
+            print(indices)
+            #ex. between index 14,17 choose one by weighted random,using their values from list_values
+            choice = np.random.choice(indices,a[indices])
+            choice = choice[0][0]
+            print(choice)
+            next_word = list_words[indices[choice]]
             next_word = next_word.split(" ",1)[1]
             first_word = next_word + " "
             print(first_word)
