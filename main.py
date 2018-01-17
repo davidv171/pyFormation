@@ -127,6 +127,30 @@ def own_entropy(input_text):
     return new_dict
 
 
+def first_word_generator(list_words,list_values):
+    #normalize
+    probabilities = np.array(list_values).astype(np.float)
+    probabilities = probabilities / np.sum(probabilities)
+    choiceX = np.random.choice(list_words, p=probabilities)
+    choiceX = choiceX.split(" ",1)[0]
+    return choiceX
+
+def next_word_generator(first_word,list_words,list_values,limit):
+    print("Loop printing")
+    print(first_word)
+    probabilities = np.array(list_values).astype(np.float)
+    probabilities = probabilities / np.sum(probabilities)
+    for x in range(0,limit):
+        indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
+        #ex. between index 14,17 choose one by weighted random,using their values from list_values
+        #PROBABILITIES DO NOT SUM TO 1
+        choiceX = np.random.choice(indices, p=probabilities[indices])
+        next_word = list_words[choiceX]
+        next_word = next_word.split(" ",1)[1]
+        first_word = next_word + " "
+        print(first_word)
+    return next_word
+
 def word_generator(words,bigrams,limit):
     #A function that generates words using the Markov chain principle!
     #First word is found in the words Counter object, takes the first word(most common)
@@ -138,37 +162,29 @@ def word_generator(words,bigrams,limit):
     #count is ordered, meaning the highest probabilities are first
     #find a first word and get the highest probability or count for (word|...)
     #We use Counter because numpy.random.choice doesnt take float into its parametres
-    first_word_c = list(words.keys())
-    print(first_word_c)
-    first_word = first_word_c[0]
+    print(words)
+    print(bigrams)
     list_words = list(bigrams.keys())
-
     list_values = list(bigrams.values())
     print("Generated text:")
+    first_word = first_word_generator(list_words,list_values)
     first_word = first_word + " "
+    print(first_word)
     #TODO: TEST WORD_GENERATOR SOME MORE
     #TODO: Make the next choice WEIGHTED random, use numpy.random.choose
     print("Randomm testing")
     #print(list_words[rnd.choice(list_values)])
     #choice = rnd.choice(list_words,list_values)
     #we use a numpy array to be able to use a list as indexes,ex. a[0,14,33]
-    a = np.array(list_values)
-    test_list = [0,4,5]
+    print(first_word)
+
     try:
-        print("Loop printing")
-        for x in range(0,limit):
-            indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
-            print(indices)
-            #ex. between index 14,17 choose one by weighted random,using their values from list_values
-            choice = np.random.choice(indices,a[indices])
-            choice = choice[0][0]
-            print(choice)
-            next_word = list_words[indices[choice]]
-            next_word = next_word.split(" ",1)[1]
-            first_word = next_word + " "
-            print(first_word)
+        print(next_word_generator(first_word,list_words,list_values,limit))
     except IndexError:
-        print("Index out of bounds, check limit!")
+        #In case of an index error restart the search for first word and the loop
+        word_generator(words,bigrams,limit)
+
+
     return 0
 
 text = get_text()
@@ -216,4 +232,4 @@ if len(word_count) < 100 :
     print(cond_entropies)
 print("Word generator")
 ordered_word = collections.OrderedDict(word_count.most_common())
-print(word_generator(ordered_word,bigrams,100))
+print(word_generator(own_probabilities,conditional_probabilities,100))
