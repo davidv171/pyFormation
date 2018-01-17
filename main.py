@@ -129,6 +129,7 @@ def own_entropy(input_text):
 
 def first_word_generator(list_words,list_values):
     #normalize
+    #TODO: Join with next_word_generator
     probabilities = np.array(list_values).astype(np.float)
     probabilities = probabilities / np.sum(probabilities)
     choiceX = np.random.choice(list_words, p=probabilities)
@@ -136,19 +137,26 @@ def first_word_generator(list_words,list_values):
     return choiceX
 
 def next_word_generator(first_word,list_words,list_values,limit):
-    print("Loop printing")
-    print(first_word)
     probabilities = np.array(list_values).astype(np.float)
     probabilities = probabilities / np.sum(probabilities)
-    for x in range(0,limit):
-        indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
-        #ex. between index 14,17 choose one by weighted random,using their values from list_values
-        #PROBABILITIES DO NOT SUM TO 1
-        choiceX = np.random.choice(indices, p=probabilities[indices])
-        next_word = list_words[choiceX]
-        next_word = next_word.split(" ",1)[1]
-        first_word = next_word + " "
-        print(first_word)
+
+    try:
+        for x in range(0,limit):
+            indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
+                #ex. between index 14,17 choose one by weighted random,using their values from list_values
+                #PROBABILITIES DO NOT SUM TO 1
+            temp = probabilities[indices]/np.sum(probabilities[indices])
+            if not indices:
+                next_word = first_word_generator(list_words,list_values) + " "
+                print(next_word)
+            else:
+                choiceX = np.random.choice(indices, p=temp)
+                next_word = list_words[choiceX]
+                next_word = next_word.split(" ",1)[1]
+                first_word = next_word + " "
+                print(first_word)
+    except TypeError:
+        print("Value Error here")
     return next_word
 
 def word_generator(words,bigrams,limit):
@@ -162,8 +170,6 @@ def word_generator(words,bigrams,limit):
     #count is ordered, meaning the highest probabilities are first
     #find a first word and get the highest probability or count for (word|...)
     #We use Counter because numpy.random.choice doesnt take float into its parametres
-    print(words)
-    print(bigrams)
     list_words = list(bigrams.keys())
     list_values = list(bigrams.values())
     print("Generated text:")
@@ -179,10 +185,11 @@ def word_generator(words,bigrams,limit):
     print(first_word)
 
     try:
-        print(next_word_generator(first_word,list_words,list_values,limit))
+        next_word_generator(first_word,list_words,list_values,limit)
     except IndexError:
         #In case of an index error restart the search for first word and the loop
-        word_generator(words,bigrams,limit)
+        print("Picking new first word")
+        first_word_generator(words,bigrams,limit)
 
 
     return 0
@@ -232,4 +239,4 @@ if len(word_count) < 100 :
     print(cond_entropies)
 print("Word generator")
 ordered_word = collections.OrderedDict(word_count.most_common())
-print(word_generator(own_probabilities,conditional_probabilities,100))
+print(word_generator(own_probabilities,conditional_probabilities,12))
