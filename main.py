@@ -6,9 +6,11 @@ import math
 import sys
 import operator
 import numpy as np
+import os
 
 def get_text():
     try:
+        path = input("Full path to text source file: ")
         with open("/home/PycharmProjects/pyFormationNEW/pyFormation/samplesource.txt", 'r') as myFile:
             data = myFile.read()
     except IOError:
@@ -80,14 +82,16 @@ def cond_prob(input_text, words,cnt):
 
     #Find the first word of each key in double_own and compare it to own_probs, then divide their keys
     divided_list = []
-    for keyxd in double_own:
+    for keyxd in lowercase_count:
         first_word = keyxd.split()[0]
         if first_word in own_probs:
             double_value = double_count[keyxd]
             own_value = own_probs[first_word]
             divided_value = double_value / own_value
             divided_list.append(divided_value)
+
     cond_probs = dict(zip(lowercase_count, divided_list))
+
     return cond_probs
 
 
@@ -119,11 +123,11 @@ def own_entropy(input_text):
     for x in range(0, len(all_values)):
         all_values[x] = (math.fabs(all_values[x] * math.log(all_values[x],2)))
     new_dict = dict(zip(all_words, all_values))
-    print("Sum of all entropies")
+
     entropy = 0.0
     for x in range(0,len(all_values)):
         entropy += all_values[x]
-    print(entropy)
+    print(" - Sum of all entropies: "+str(entropy))
     return new_dict
 
 
@@ -139,7 +143,6 @@ def first_word_generator(list_words,list_values):
 def next_word_generator(first_word,list_words,list_values,limit):
     probabilities = np.array(list_values).astype(np.float)
     probabilities = probabilities / np.sum(probabilities)
-
     try:
         for x in range(0,limit):
             indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
@@ -175,22 +178,14 @@ def word_generator(words,bigrams,limit):
     print("Generated text:")
     first_word = first_word_generator(list_words,list_values)
     first_word = first_word + " "
-    print(first_word)
     #TODO: TEST WORD_GENERATOR SOME MORE
-    #TODO: Make the next choice WEIGHTED random, use numpy.random.choose
-    print("Randomm testing")
-    #print(list_words[rnd.choice(list_values)])
     #choice = rnd.choice(list_words,list_values)
     #we use a numpy array to be able to use a list as indexes,ex. a[0,14,33]
     print(first_word)
-
     try:
         next_word_generator(first_word,list_words,list_values,limit)
     except IndexError:
-        #In case of an index error restart the search for first word and the loop
-        print("Picking new first word")
-        first_word_generator(words,bigrams,limit)
-
+        print("Index error")
 
     return 0
 
@@ -208,8 +203,7 @@ bigrams = bigram(words)
 conditional_probabilities = cond_prob(words,word_count,bigrams)
 with open("Cond_probs.txt", "w") as text_file:
     print(conditional_probabilities, file=text_file)
-print("Equal entropy(equal for every word):")
-print(equal_entropy(word_length))
+print("Equal entropy(equal for every word): " + str(equal_entropy(word_length)))
 print("Entropy using the own probabilities")
 own_entropies = own_entropy(own_probabilities)
 print("Conditional entropy:")
@@ -239,4 +233,6 @@ if len(word_count) < 100 :
     print(cond_entropies)
 print("Word generator")
 ordered_word = collections.OrderedDict(word_count.most_common())
-print(word_generator(own_probabilities,conditional_probabilities,12))
+limit = int(input("How many words to print out?"))
+limit = limit + 1
+print(word_generator(own_probabilities,conditional_probabilities,limit))
