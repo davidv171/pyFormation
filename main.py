@@ -11,7 +11,7 @@ import os
 def get_text():
     try:
         dirpath= os.path.dirname(os.path.realpath(__file__))
-        path = input("Name of source file(in the directory): ")
+        path = input("Name of source file(in the directory-" + dirpath + ": ")
         path = dirpath + "/" + path
         #/home/PycharmProjects/pyFormationNEW/pyFormation/samplesource.txt for testing
         with open(path, 'r') as myFile:
@@ -135,7 +135,8 @@ def own_entropy(input_text):
 
 
 def first_word_generator(list_words,list_values):
-    #normalize
+    #Normalize the probabilities to 1, to avoid doesnt sum to 1 error
+    #Uses unigram's list of words and its list of values=probabilities to make a choice
     probabilities = np.array(list_values).astype(np.float)
     probabilities = probabilities / np.sum(probabilities)
     choiceX = np.random.choice(list_words, p=probabilities)
@@ -148,12 +149,11 @@ def next_word_generator(first_word,list_words,list_values,limit,first_word_words
     try:
         for x in range(0,limit):
             indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
-                #ex. between index 14,17 choose one by weighted random,using their values from list_values
+            #ex. between index 14,17 choose one by weighted random,using their values from list_values
             temp = probabilities[indices]/np.sum(probabilities[indices])
             if not indices:
                 #Creates a new first word if we hit a wall(last word)
                 first_word = first_word_generator(first_word_words,first_word_values) + " "
-                #Tilde means the program ran into a wall and is going to choose a new word
 
             else:
                 choiceX = np.random.choice(indices, p=temp)
