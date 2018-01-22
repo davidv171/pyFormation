@@ -11,7 +11,8 @@ import os
 def get_text():
     try:
         path = input("Full path to text source file: ")
-        with open("/home/PycharmProjects/pyFormationNEW/pyFormation/samplesource.txt", 'r') as myFile:
+        #/home/PycharmProjects/pyFormationNEW/pyFormation/samplesource.txt for testing
+        with open(path, 'r') as myFile:
             data = myFile.read()
     except IOError:
         sys.exit(0)
@@ -141,23 +142,25 @@ def first_word_generator(list_words,list_values):
     return choiceX
 
 def next_word_generator(first_word,list_words,list_values,limit):
+    #Normalize the probabilities to 1, to avoid doesnt sum to 1 error
     probabilities = np.array(list_values).astype(np.float)
     probabilities = probabilities / np.sum(probabilities)
     try:
         for x in range(0,limit):
             indices = [i for i, s in enumerate(list_words) if s.startswith(first_word)]
                 #ex. between index 14,17 choose one by weighted random,using their values from list_values
-                #PROBABILITIES DO NOT SUM TO 1
             temp = probabilities[indices]/np.sum(probabilities[indices])
             if not indices:
-                next_word = first_word_generator(list_words,list_values) + " "
-                print(next_word)
+                #Creates a new first word if we hit a wall(last word)
+                first_word = first_word_generator(list_words,list_values) + " "
+                #Tilde means the program ran into a wall and is going to choose a new word
+
             else:
                 choiceX = np.random.choice(indices, p=temp)
                 next_word = list_words[choiceX]
                 next_word = next_word.split(" ",1)[1]
                 first_word = next_word + " "
-                print(first_word)
+                print(first_word,end="")
     except TypeError:
         print("Value Error here")
     return next_word
@@ -172,7 +175,7 @@ def word_generator(words,bigrams,limit):
     #Limit tells us how many words we want to generate
     #count is ordered, meaning the highest probabilities are first
     #find a first word and get the highest probability or count for (word|...)
-    #We use Counter because numpy.random.choice doesnt take float into its parametres
+    #We use Counter because numpy.random.choice for weighted random
     list_words = list(bigrams.keys())
     list_values = list(bigrams.values())
     print("Generated text:")
@@ -181,13 +184,13 @@ def word_generator(words,bigrams,limit):
     #TODO: TEST WORD_GENERATOR SOME MORE
     #choice = rnd.choice(list_words,list_values)
     #we use a numpy array to be able to use a list as indexes,ex. a[0,14,33]
-    print(first_word)
+    print(first_word,end="")
     try:
         next_word_generator(first_word,list_words,list_values,limit)
     except IndexError:
         print("Index error")
 
-    return 0
+    return "."
 
 text = get_text()
 words = split_text(text)
