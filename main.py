@@ -10,7 +10,9 @@ import os
 
 def get_text():
     try:
-        path = input("Full path to text source file: ")
+        dirpath= os.path.dirname(os.path.realpath(__file__))
+        path = input("Name of source file(in the directory): ")
+        path = dirpath + "/" + path
         #/home/PycharmProjects/pyFormationNEW/pyFormation/samplesource.txt for testing
         with open(path, 'r') as myFile:
             data = myFile.read()
@@ -134,14 +136,12 @@ def own_entropy(input_text):
 
 def first_word_generator(list_words,list_values):
     #normalize
-    #TODO: Join with next_word_generator
     probabilities = np.array(list_values).astype(np.float)
     probabilities = probabilities / np.sum(probabilities)
     choiceX = np.random.choice(list_words, p=probabilities)
-    choiceX = choiceX.split(" ",1)[0]
     return choiceX
 
-def next_word_generator(first_word,list_words,list_values,limit):
+def next_word_generator(first_word,list_words,list_values,limit,first_word_words,first_word_values):
     #Normalize the probabilities to 1, to avoid doesnt sum to 1 error
     probabilities = np.array(list_values).astype(np.float)
     probabilities = probabilities / np.sum(probabilities)
@@ -152,7 +152,7 @@ def next_word_generator(first_word,list_words,list_values,limit):
             temp = probabilities[indices]/np.sum(probabilities[indices])
             if not indices:
                 #Creates a new first word if we hit a wall(last word)
-                first_word = first_word_generator(list_words,list_values) + " "
+                first_word = first_word_generator(first_word_words,first_word_values) + " "
                 #Tilde means the program ran into a wall and is going to choose a new word
 
             else:
@@ -176,17 +176,20 @@ def word_generator(words,bigrams,limit):
     #count is ordered, meaning the highest probabilities are first
     #find a first word and get the highest probability or count for (word|...)
     #We use Counter because numpy.random.choice for weighted random
+    #We make 2 lists out of each dictionary
     list_words = list(bigrams.keys())
     list_values = list(bigrams.values())
+    first_word_words = list(words.keys())
+    first_word_values = list(words.values())
     print("Generated text:")
-    first_word = first_word_generator(list_words,list_values)
+    first_word = first_word_generator(first_word_words,first_word_values)
     first_word = first_word + " "
     #TODO: TEST WORD_GENERATOR SOME MORE
     #choice = rnd.choice(list_words,list_values)
     #we use a numpy array to be able to use a list as indexes,ex. a[0,14,33]
     print(first_word,end="")
     try:
-        next_word_generator(first_word,list_words,list_values,limit)
+        next_word_generator(first_word,list_words,list_values,limit,first_word_words,first_word_values)
     except IndexError:
         print("Index error")
 
@@ -206,7 +209,7 @@ bigrams = bigram(words)
 conditional_probabilities = cond_prob(words,word_count,bigrams)
 with open("Cond_probs.txt", "w") as text_file:
     print(conditional_probabilities, file=text_file)
-print("Equal entropy(equal for every word): " + str(equal_entropy(word_length)))
+print("Equal entropy(equal for every word): " + str(equal_entropy(len(word_count))))
 print("Entropy using the own probabilities")
 own_entropies = own_entropy(own_probabilities)
 print("Conditional entropy:")
